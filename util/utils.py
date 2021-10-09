@@ -2,6 +2,14 @@ import joblib
 import os, socket
 
 def loadJbl(filepath):
+    """Loadd jbl files
+
+    Args:
+        filepath ([type]): [description]
+
+    Returns:
+        [type]: [description]
+    """
     with open(filepath, mode="rb") as f:
         data = joblib.load(f)
     return data
