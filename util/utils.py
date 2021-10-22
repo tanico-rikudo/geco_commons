@@ -5,10 +5,10 @@ def loadJbl(filepath):
     """Loadd jbl files
 
     Args:
-        filepath ([type]): [description]
+        filepath (str): target 
 
     Returns:
-        [type]: [description]
+        var: loaded data 
     """
     with open(filepath, mode="rb") as f:
         data = joblib.load(f)
@@ -27,3 +27,11 @@ def get_env():
         env_name = None
     info['env_name']=env_name
     return info
+
+def is_type(obj, _type):
+    if type(obj) == _type:
+        return True
+    else:
+        return False
+        
+    
