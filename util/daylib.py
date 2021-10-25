@@ -5,7 +5,12 @@ import os
 # D: Date
 # None: datetime
 class daylib():
+    @classmethod
+    def currentTime(cls, offset=None):
+        dt_offset = dt.now().astimezone(timezone(timedelta(hours=offset)))
+        return dt_offset
 
+    
     @classmethod
     def valid_intD(cls, int_date):
         if (int_date < 20000101)or(int_date>21001231):
