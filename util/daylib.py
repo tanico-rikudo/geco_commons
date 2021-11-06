@@ -9,12 +9,16 @@ class daylib():
     def currentTime(cls, offset=None):
         dt_offset = dt.now().astimezone(timezone(timedelta(hours=offset)))
         return dt_offset
-
     
     @classmethod
-    def valid_intD(cls, int_date):
+    def valid_intD(cls, int_date, allow_future=True):
         if (int_date < 20000101)or(int_date>21001231):
             raise Exception("int_date must be 8-digits and following realworld")
+        
+        if not allow_future :
+            if (int_date >= cls.dt_to_intD(cls.currentTime())):
+                raise Exception("Future date.")
+            
         return True
 
     @classmethod
@@ -60,8 +64,6 @@ class daylib():
         dt_obj = cls.intD_to_dt(int_date)
         dt_obj = dt_obj+ timedelta(days=offset)
         return cls.dt_to_intD(dt_obj)
-
-
 
     @classmethod
     def get_between_date(cls, since_int_date, until_int_date) :
