@@ -16,7 +16,7 @@ def loadJbl(filepath):
         data = joblib.load(f)
     return data
 
-def readJbl(data, filepath):
+def saveJbl(data, filepath):
     with open(filepath, mode="wb") as f:
         joblib.dump(data, f)
     return 
