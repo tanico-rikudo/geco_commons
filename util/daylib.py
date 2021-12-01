@@ -27,6 +27,12 @@ class daylib():
         return dt.strptime(str(int_date),'%Y%m%d')
 
     @classmethod
+    def intD_to_strYMD(cls, int_date):
+        dt_obj=cls.intD_to_dt(int_date)
+        str_date = cls.dt_to_strYMD(dt_obj)
+        return str_date
+    
+    @classmethod
     def intD_to_strD(cls, int_date):
         cls.valid_intD(int_date)
         return str(int_date)
@@ -38,6 +44,10 @@ class daylib():
     @classmethod
     def dt_to_intYMDHMSF(cls, dt_obj):
         return dt_obj.strftime('%Y%m%d%H%M%S%f')
+    
+    @classmethod
+    def dt_to_strYMD(cls, dt_obj):
+        return dt_obj.strftime('%Y-%m-%d')
 
     @classmethod
     def str_utc_to_dt_offset(cls, str_utc, offset=0,is_T=True,is_ms=True, is_Z=True):

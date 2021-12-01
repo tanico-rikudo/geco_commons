@@ -24,7 +24,10 @@ class ConfigManager:
         return config_ini if mode is None else config_ini[mode]
     
     def load_log_config(self,log_path,log_name):
-        logging.config.fileConfig(os.path.join(self.config_dir ,self.default_config_file["log"]),defaults={'logfilename': log_path})
-        return logging.getLogger(log_name)
+        log_config_path= os.path.join(self.config_dir ,self.default_config_file["log"])
+        logging.config.fileConfig(log_config_path,defaults={'logfilename': log_path})
+        logger= logging.getLogger(log_name)
+        logging.info("[DONE] Get logger. Config={0}, Log={1}".format(log_config_path, log_path))
+        return logger
         
         
