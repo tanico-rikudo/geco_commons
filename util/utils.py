@@ -30,7 +30,7 @@ def load_config(path, default_path):
 
 def load_yaml(path):
     try:
-        with open('sample.yaml') as file:
+        with open(path) as file:
             obj = yaml.safe_load(file)
         return obj
     except Exception as e:
