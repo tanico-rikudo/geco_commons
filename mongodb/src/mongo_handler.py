@@ -1,27 +1,68 @@
 from pymongo import MongoClient
+from pymongo import DESCENDING, ASCENDING
 import configparser
 import logging
 import logging.config
+import ast
 
+MongoHandlerConditionMolts = {
+    "filterTimeBeginWith":"{{'time':{{'$regex':'^{0}'}}}}",
+    "filterSymbol":"{{'symbol':{0}}}"
+}
+
+class MongoUtil:
+    
+    def __init__(self, mongoHandler, logger):
+        self.dao = mongoHandler
+        self._logger = logger
+        
+    def delete_at_date(self,table, date=None, symbol=None):
+        _filter  = {}
+        if  date is not None:
+            filter_date = ast.literal_eval(MongoHandlerConditionMolts.get("filterTimeBeginWith").format(date))
+            _filter.update(filter_date)
+        if symbol is not  None:
+            filter_symbol = ast.literal_eval(MongoHandlerConditionMolts.get("filterSymbol").format(symbol))
+            _filter.update(filter_symbol)
+        self.dao.delete(table , filter=_filter)
+        
+    def find_at_date(self, table, date=None, symbol=None):
+        _filter  = {}
+        if  date is not None:
+            filter_date = ast.literal_eval(MongoHandlerConditionMolts.get("filterTimeBeginWith").format(date))
+            _filter.update(filter_date)
+        if symbol is not  None:
+            filter_symbol = ast.literal_eval(MongoHandlerConditionMolts.get("filterSymbol").format(symbol))
+            _filter.update(filter_symbol)
+        return self.dao.find(table,filter=_filter)
+        
 class MongoHandler:
-    def __init__(self,config,db_name):
+    def __init__(self,config, table_name):
         self.host = config.get('host')
-        self.clint = MongoClient(self.host,)
-        self.db_name = db_name
-        self.db = self.clint[self.db_name]
+        self.client = MongoClient(self.host,)
+        self.db_name = config.get('db_name')
+        self.table_name = table_name
+        self.db = self.client[self.db_name]
 
-    def insert_one(self, json, db=None):
-        return self.db[self.db_name].insert_one(json)
+    def insert_one(self, json, name = None):
+        name = self.table_name if name  is None else name
+        return self.db[name].insert_one(json)
 
-    def insert_many(self, json_list):
-        return self.db[self.db_name].insert_many(json_list)
+    def insert_many(self, json_list, name = None):
+        name = self.table_name if name  is None else name
+        return self.db[name].insert_many(json_list)
 
-    def delete_all(self):
-        self.db[self.db_name].delete_many({})
+    def delete(self, name = None, filter=None):
+        name = self.table_name if name  is None else name
+        self.db[name].delete_many(filter=filter)
         return 
 
-    def find(self, query={}):
-        return self.db[self.db_name].find(query)
+    def find(self, name = None, projection=None,filter=None, sort=None):
+        name = self.table_name if name  is None else name
+        return self.db[name].find(projection=projection,filter=filter, sort=sort)
+    
+    def close(self):
+        self.client.close()
 
     def start_session(self):
         self.session = self.client.start_session()
