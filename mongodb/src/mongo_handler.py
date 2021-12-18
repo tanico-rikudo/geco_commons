@@ -38,28 +38,31 @@ class MongoUtil:
         
 class MongoHandler:
     def __init__(self,config, table_name):
-        self.host = config.get('host')
+        self.host = config.get('DB_HOST')
         self.client = MongoClient(self.host,)
-        self.db_name = config.get('db_name')
+        self.db_name = config.get('DB_NAME')
         self.table_name = table_name
         self.db = self.client[self.db_name]
+        
+    def use_table(self,table_name = None):
+        table_name = self.table_name if table_name  is None else table_name
+        if not table_name in self.db.list_collection_names():
+            self.db.create_collection(table_name,
+                        storageEngine={'wiredTiger':{'configString':'block_compressor=snappy'}})
+        table = self.db[table_name]
+        return  table
 
-    def insert_one(self, json, name = None):
-        name = self.table_name if name  is None else name
-        return self.db[name].insert_one(json)
+    def insert_one(self, json, table_name = None):
+        return self.db[table_name].insert_one(json)
 
-    def insert_many(self, json_list, name = None):
-        name = self.table_name if name  is None else name
-        return self.db[name].insert_many(json_list)
+    def insert_many(self, json_list, table_name = None):
+        return self.use_table(table_name).insert_many(json_list)
 
-    def delete(self, name = None, filter=None):
-        name = self.table_name if name  is None else name
-        self.db[name].delete_many(filter=filter)
-        return 
+    def delete(self, table_name = None, filter=None):
+        return self.use_table(table_name).delete_many(filter=filter)
 
-    def find(self, name = None, projection=None,filter=None, sort=None):
-        name = self.table_name if name  is None else name
-        return self.db[name].find(projection=projection,filter=filter, sort=sort)
+    def find(self, table_name = None, projection=None,filter=None, sort=None):
+        return self.use_table(table_name).find(projection=projection,filter=filter, sort=sort)
     
     def close(self):
         self.client.close()
@@ -76,7 +79,7 @@ class MongoHandler:
 
     def test():
         try:
-            # self.db[self.db_name].update_one(, session=s)
+            # self.db[self.DB_NAME].update_one(, session=s)
             pass
         except Exception:
             self.abort_transaction()
