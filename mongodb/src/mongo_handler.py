@@ -53,7 +53,7 @@ class MongoHandler:
         return  table
 
     def insert_one(self, json, table_name = None):
-        return self.db[table_name].insert_one(json)
+        return self.use_table(table_name).insert_one(json)
 
     def insert_many(self, json_list, table_name = None):
         return self.use_table(table_name).insert_many(json_list)
