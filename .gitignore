@@ -131,3 +131,6 @@ dmypy.json
 # ini
 *.ini
 *.yaml
+
+### Our of monintoring
+*.conf
