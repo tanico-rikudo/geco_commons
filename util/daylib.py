@@ -1,10 +1,14 @@
 from datetime import datetime as dt
 from datetime import  timedelta, timezone
+import pytz
 import os
 
 # D: Date
 # None: datetime
 class daylib():
+    # Constant obj
+    utc_tz = pytz.timezone('UTC')
+    
     @classmethod
     def currentTime(cls, offset=None):
         dt_offset = dt.now().astimezone(timezone(timedelta(hours=offset)))
@@ -50,7 +54,7 @@ class daylib():
         return dt_obj.strftime('%Y-%m-%d')
 
     @classmethod
-    def str_utc_to_dt_offset(cls, str_utc, offset=0,is_T=True,is_ms=True, is_Z=True):
+    def str_utc_to_dt_offset(cls, str_utc, local_tz_str=None,is_T=True,is_ms=True, is_Z=True):
         format = '%Y-%m-%d'
 
         T =  'T' if  is_T else ' '
@@ -61,11 +65,15 @@ class daylib():
             format = format +'%H:%M:%S'
         # format += '.%z'
         format +=  'Z' if  is_Z else ''
+        
+        local_tz_str = "Asia/Tokyo" if local_tz_str is None else local_tz_str
+        local_tz = pytz.timezone(local_tz_str) 
 
-        # dt_utc = dt.strptime(str_utc + "+0000", format)
-        dt_utc = dt.strptime(str_utc, format)
-        dt_offset = dt_utc.astimezone(timezone(timedelta(hours=offset)))
-        return dt_offset
+        
+        dt_utc = dt.strptime(str_utc, format) #naive
+        dt_utc_tz = cls.utc_tz.localize(dt_utc) #aware
+        dt_local_tz=local_tz.normalize(dt_utc_tz)#localize
+        return dt_local_tz
 
 
     @classmethod
