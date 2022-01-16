@@ -132,5 +132,6 @@ dmypy.json
 *.ini
 *.yaml
 
-### Our of monintoring
+# sam psudo deploy files
+.aws-sam/
 *.conf
