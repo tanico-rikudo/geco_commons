@@ -38,9 +38,9 @@ class MongoUtil:
         
 class MongoHandler:
     def __init__(self,config, table_name):
-        self.host = config.get('DB_HOST')
+        self.host = config.get('MONGODB_HOST')
         self.client = MongoClient(self.host,)
-        self.db_name = config.get('DB_NAME')
+        self.db_name = config.get('MONGODB_NAME')
         self.table_name = table_name
         self.db = self.client[self.db_name]
         
