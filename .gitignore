@@ -135,3 +135,7 @@ dmypy.json
 # sam psudo deploy files
 .aws-sam/
 *.conf
+
+#mongo secret
+mongodb/secret/*
+mongodb/init/*
