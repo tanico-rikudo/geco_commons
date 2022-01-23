@@ -17,7 +17,7 @@ class ConfigManager:
         }
         
     def load_ini_config(self, path=None,config_name=None,mode=None):
-        config_ini = configparser.ConfigParser()
+        config_ini = configparser.SafeConfigParser(os.environ) # Note: Inject Local envs to config ini file 
         path = os.path.join(self.config_dir, self.default_config_file[config_name] ) if path is None else path
         config_ini.read(path, encoding='utf-8')
         return config_ini if mode is None else config_ini[mode]
@@ -32,6 +32,7 @@ class ConfigManager:
         logging.config.fileConfig(log_config_path,defaults={'logfilename': log_path})
         logger= logging.getLogger(log_name)
         logging.info("[DONE] Get logger. Config={0}, Log={1}".format(log_config_path, log_path))
+        print(f"Log path = {log_path}")
         return logger
     
     def load_yaml_config(self, path=None, config_name=None, mode=None):

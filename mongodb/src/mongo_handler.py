@@ -4,6 +4,7 @@ import configparser
 import logging
 import logging.config
 import ast
+import urllib.parse
 
 MongoHandlerConditionMolts = {
     "filterTimeBeginWith":"{{'time':{{'$regex':'^{0}'}}}}",
@@ -37,10 +38,16 @@ class MongoUtil:
         return self.dao.find(table,filter=_filter)
         
 class MongoHandler:
+    
     def __init__(self,config, table_name):
-        self.host = config.get('DB_HOST')
-        self.client = MongoClient(self.host,)
-        self.db_name = config.get('DB_NAME')
+        self.host = config.get('MONGODB_HOST')
+        self.port = config.get('MONGODB_PORT')
+        self.db_name = config.get('MONGODB_NAME')
+        self.db_user = config.get('MONGODB_USERNAME')
+        self.db_pw = config.get('MONGODB_PASSWORD')
+
+        connect_url = f"mongodb://{self.db_user}:{self.db_pw}@{self.host}:{self.port}/"
+        self.client = MongoClient(connect_url)
         self.table_name = table_name
         self.db = self.client[self.db_name]
         

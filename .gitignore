@@ -131,3 +131,24 @@ dmypy.json
 # ini
 *.ini
 *.yaml
+
+# sam psudo deploy files
+.aws-sam/
+*.conf
+
+#mongo secret
+mongodb/secret/*
+mongodb/init/*
+
+
+#mlflow
+mlflow/mlruns/*
+
+# Mac
+.DS_Store
+
+# DB
+*.db
+
+#mq
+mq/rabbitmq-data/*
