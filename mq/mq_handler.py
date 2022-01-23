@@ -10,7 +10,7 @@ class MqProvider(object):
 
         
     def connect_mq(self):
-
+        self.logger.info(f"[START] Connect MQ server... Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
         self.connection = pika.BlockingConnection(
         pika.ConnectionParameters(host=self.mqserver_host))
         self.channel = self.connection.channel()
