@@ -139,3 +139,13 @@ dmypy.json
 #mongo secret
 mongodb/secret/*
 mongodb/init/*
+
+
+#mlflow
+mlflow/mlruns/*
+
+# Mac
+.DS_Store
+
+# DB
+*.db
