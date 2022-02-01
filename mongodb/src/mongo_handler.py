@@ -46,7 +46,7 @@ class MongoHandler:
         self.db_user = config.get('MONGODB_USERNAME')
         self.db_pw = config.get('MONGODB_PASSWORD')
 
-        connect_url = f"mongodb://{self.db_user}:{self.db_pw}@{self.host}:{self.port}/"
+        self.connect_url = f"mongodb://{self.db_user}:{self.db_pw}@{self.host}:{self.port}/authSource={self.db_name}"        
         self.client = MongoClient(connect_url)
         self.table_name = table_name
         self.db = self.client[self.db_name]
