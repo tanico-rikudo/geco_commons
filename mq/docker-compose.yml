@@ -1,7 +1,7 @@
 version: '3'
- 
+
 services:
-  my-queue:
+  misaka_mq:
     container_name: misaka_rabbitmq
     image: rabbitmq:3.8.9-management
     ports:
@@ -17,5 +17,5 @@ volumes:
   rabbitmq-data:
 
 networks:
-    shared-nw:
-      external: true
+  shared-nw:
+    external: true

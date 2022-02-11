@@ -1,45 +1,48 @@
-
 import pika
 import uuid
+
+
 class MqProvider(object):
     def __init__(self, mqserver_host, mqname, routing_key, logger):
         self.mqserver_host = mqserver_host
-        self.mqname  = mqname
+        self.mqname = mqname
         self.routing_key = routing_key
         self.logger = logger
 
-        
     def connect_mq(self):
-        self.logger.info(f"[START] Connect MQ server... Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
+        self.logger.info(
+            f"[START] Connect MQ server... Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
         self.connection = pika.BlockingConnection(
-        pika.ConnectionParameters(host=self.mqserver_host))
+            pika.ConnectionParameters(host=self.mqserver_host))
         self.channel = self.connection.channel()
         self.channel.queue_declare(queue=self.mqname)
-        self.logger.info(f"[DONE] Connect MQ server. Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
-        
-    def publish_mq(self, data, exchange='', routing_key=None,properties=None ):  
+        self.logger.info(
+            f"[DONE] Connect MQ server. Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
+
+    def publish_mq(self, data, exchange='', routing_key=None, properties=None):
         exchange = '' if exchange is None else exchange
         routing_key = self.routing_key if routing_key is None else routing_key
         self.channel.basic_publish(exchange=exchange,
-                                    routing_key=routing_key,
-                                    properties= properties,
-                                    body=data)
-        self.logger.info(f"[DONE] Send data via MQ. Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
-        
+                                   routing_key=routing_key,
+                                   properties=properties,
+                                   body=data)
+        self.logger.info(
+            f"[DONE] Send data via MQ. Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
+
     def close_mq(self):
-        self.channel.basic_cancel() # declare no more send
+        self.channel.basic_cancel()  # declare no more send
         self.connection.close()
-        self.logger.info(f"[DONE] Close MQ connecton. Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
-        
-        
-        
+        self.logger.info(
+            f"[DONE] Close MQ connecton. Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
+
+
 class RpcClient(object):
 
     def __init__(self, mqserver_host, routing_key, logger):
         self.mqserver_host = mqserver_host
         self.routing_key = routing_key
         self.logger = logger
-        
+
         self.connection = pika.BlockingConnection(
             pika.ConnectionParameters(host=self.mqserver_host))
 
@@ -52,7 +55,7 @@ class RpcClient(object):
             queue=self.callback_queue,
             on_message_callback=self.on_response,
             auto_ack=True)
-        
+
         self.logger.info(f"[DONE] RPC request client initilized. Host={mqserver_host}, Routing={routing_key}")
 
     def on_response(self, ch, method, props, body):
@@ -75,11 +78,6 @@ class RpcClient(object):
         while self.response is None:
             self.connection.process_data_events()
         return self.response
-    
-    
+
     def end_call(self):
         self.call("END")
-
-
-        
-    
