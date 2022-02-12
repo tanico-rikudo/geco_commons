@@ -17,7 +17,8 @@ class ConfigManager:
         }
         
     def load_ini_config(self, path=None,config_name=None,mode=None):
-        config_ini = configparser.SafeConfigParser(os.environ) # Note: Inject Local envs to config ini file 
+        # config_ini = configparser.SafeConfigParser(os.environ) # Note: Inject Local envs to config ini file 
+        config_ini = configparser.ConfigParser(os.environ) # Note: Inject Local envs to config ini file 
         path = os.path.join(self.config_dir, self.default_config_file[config_name] ) if path is None else path
         config_ini.read(path, encoding='utf-8')
         return config_ini if mode is None else config_ini[mode]
