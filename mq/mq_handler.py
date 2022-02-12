@@ -2,6 +2,26 @@ import pika
 import uuid
 
 
+def load_mq_settings(general_config):
+    use_mq = general_config.get("USE_MQ")
+    if use_mq:
+        mqserver_host = general_config.get("MQ_HOST")
+        mqname = {
+            "realtime": general_config.get("REALTIMEFEED_MQ_NAME"),
+            "historical": general_config.get("HISTORICAL_MQ_NAME"),
+        }
+        routing_key = {
+            "realtime": general_config.get("REALTIMEFEED_MQ_ROUTING"),
+            "historical": general_config.get("HISTORICAL_MQ_ROUTING"),
+        }
+    else:
+        mqserver_host = None
+        mqname = {}
+        routing_key = {}
+    
+    return {"mqserver_host":mqserver_host, "mqname":mqname, "routing_key":routing_key}
+
+
 class MqProvider(object):
     def __init__(self, mqserver_host, mqname, routing_key, logger):
         self.mqserver_host = mqserver_host
@@ -30,16 +50,19 @@ class MqProvider(object):
             f"[DONE] Send data via MQ. Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
 
     def close_mq(self):
-        self.channel.basic_cancel()  # declare no more send
-        self.connection.close()
-        self.logger.info(
-            f"[DONE] Close MQ connecton. Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
-
+        try:
+            self.channel.basic_cancel()  # declare no more send
+            self.connection.close()
+            self.logger.info(
+                f"[DONE] Close MQ connecton. Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
+        except Exception as e:
+            self.logger.warning("Fail to close mq safety")
 
 class RpcClient(object):
 
-    def __init__(self, mqserver_host, routing_key, logger):
+    def __init__(self, mqserver_host, mqname, routing_key, logger):
         self.mqserver_host = mqserver_host
+        self.mqname = mqname
         self.routing_key = routing_key
         self.logger = logger
 
@@ -48,7 +71,9 @@ class RpcClient(object):
 
         self.channel = self.connection.channel()
 
-        result = self.channel.queue_declare(queue=self.mqname, exclusive=True)
+        # result = self.channel.queue_declare(queue=self.mqname, exclusive=True)
+        result = self.channel.queue_declare(queue=self.mqname, exclusive=False)
+
         self.callback_queue = result.method.queue
 
         self.channel.basic_consume(

@@ -8,7 +8,7 @@ services:
       - '5672:5672'
       - '15672:15672'
     volumes:
-      - ./rabbitmq-data:/var/lib/rabbitmq
+      - ${HOST_DATA_BASE_DIR}/rabbitmq:/var/lib/rabbitmq
     networks:
       shared-nw:
         ipv4_address: 172.30.0.4
