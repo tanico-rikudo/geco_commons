@@ -1,6 +1,6 @@
 import pika
 import uuid
-
+import time
 
 def load_mq_settings(general_config):
     use_mq = general_config.get("USE_MQ")
@@ -91,7 +91,7 @@ class RpcClient(object):
         commannd_msg = "" if commannd_msg is None else commannd_msg
         self.response = None
         self.corr_id = str(uuid.uuid4())
-        self.logger.info(f"[REQUEST] Call RPC. ID={self.corr_id}, Command={commannd_msg}")
+        self.logger.info(f"[REQUEST] Call RPC. ID={self.corr_id}, Command={commannd_msg}, Roiting={self.routing_key}")
         self.channel.basic_publish(
             exchange='',
             routing_key=self.routing_key,
@@ -100,6 +100,7 @@ class RpcClient(object):
                 correlation_id=self.corr_id,
             ),
             body=str(commannd_msg))
+        #Note:  anxious....
         while self.response is None:
             self.connection.process_data_events()
         return self.response

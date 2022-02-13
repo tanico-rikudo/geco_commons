@@ -9,9 +9,12 @@ services:
       - '15672:15672'
     volumes:
       - ${HOST_DATA_BASE_DIR}/rabbitmq:/var/lib/rabbitmq
+      - ${HOST_BASE_DIR}/geco_commons/mq/definitions.json:/opt/definitions.json:ro
+      - ${HOST_BASE_DIR}/geco_commons/mq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
     networks:
       shared-nw:
         ipv4_address: 172.30.0.4
+    restart: always
 
 volumes:
   rabbitmq-data:
