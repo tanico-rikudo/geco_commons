@@ -8,7 +8,7 @@ import urllib.parse
 
 MongoHandlerConditionMolts = {
     "filterTimeBeginWith": "{{'time':{{'$regex':'^{0}'}}}}",
-    "filterSymbol": "{{'symbol':{0}}}"
+    "filterSymbol": "{{'symbol':'{0}'}}"
 }
 
 

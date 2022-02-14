@@ -50,6 +50,10 @@ class daylib():
         return dt_obj.strftime('%Y%m%d%H%M%S%f')
     
     @classmethod
+    def strYMDHMSF_to_dt(cls, str_dt):
+        return dt.strptime(str_dt, '%Y%m%d%H%M%S%f')
+    
+    @classmethod
     def dt_to_strYMD(cls, dt_obj):
         return dt_obj.strftime('%Y-%m-%d')
 
