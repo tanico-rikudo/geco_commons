@@ -66,10 +66,7 @@ class RpcClient(object):
         self.routing_key = routing_key
         self.logger = logger
 
-        self.connection = pika.BlockingConnection(
-            pika.ConnectionParameters(host=self.mqserver_host))
-
-        self.channel = self.connection.channel()
+        self.connect_mq()
 
         # result = self.channel.queue_declare(queue=self.mqname, exclusive=True)
         result = self.channel.queue_declare(queue=self.mqname, exclusive=False)
@@ -82,9 +79,27 @@ class RpcClient(object):
             auto_ack=True)
 
         self.logger.info(f"[DONE] RPC request client initilized. Host={mqserver_host}, Routing={routing_key}")
-
+        
+    def connect_mq(self):
+        self.logger.info(
+            f"[START] RPC: Connect MQ server... Host={self.mqserver_host}")
+        self.connection = pika.BlockingConnection(
+            pika.ConnectionParameters(host=self.mqserver_host))
+        self.channel = self.connection.channel()
+        self.logger.info(
+           f"[DONE] RPC: Connect MQ server... Host={self.mqserver_host}")
+        
+    def close_mq(self):
+        try:
+            self.connection.close()
+            self.logger.info(
+            f"[DONE] RPC: disconnect MQ server... Host={self.mqserver_host}")
+        except:
+            self.logger.warning(f"Already Closed.  RPC: disconnect MQ server... Host={self.mqserver_host}")
+    
     def on_response(self, ch, method, props, body):
         if self.corr_id == props.correlation_id:
+            time.sleep(1)
             self.response = body
 
     def call(self, commannd_msg=None):
@@ -102,7 +117,9 @@ class RpcClient(object):
             body=str(commannd_msg))
         #Note:  anxious....
         while self.response is None:
-            self.connection.process_data_events()
+            self.connection.process_data_events(time_limit=5)
+            time.sleep(1)
+            self.logger.info(f"Waiting....")
         return self.response
 
     def end_call(self):
