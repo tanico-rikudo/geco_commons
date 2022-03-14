@@ -6,9 +6,12 @@ import logging.config
 import ast
 import urllib.parse
 
+#TODO: Optimize. 
+# filterTimeBeginWith: Allow to multiple dates...
 MongoHandlerConditionMolts = {
     "filterTimeBeginWith": "{{'time':{{'$regex':'^{0}'}}}}",
-    "filterSymbol": "{{'symbol':'{0}'}}"
+    "filterSymbol": "{{'symbol':'{0}'}}",
+    "filterTimeBetween": "{{ 'time' : {{ '$gte' : '{0}', '$lte' : '{1}' }} }}"
 }
 
 
@@ -32,6 +35,17 @@ class MongoUtil:
         _filter = {}
         if date is not None:
             filter_date = ast.literal_eval(MongoHandlerConditionMolts.get("filterTimeBeginWith").format(date))
+            _filter.update(filter_date)
+        if symbol is not None:
+            filter_symbol = ast.literal_eval(MongoHandlerConditionMolts.get("filterSymbol").format(symbol))
+            _filter.update(filter_symbol)
+        return self.dao.find(table, filter=_filter)
+    
+    def find_between_dates(self, table, sd=None, ed=None, symbol=None):
+        _filter = {}
+        # Note: not allow only sd
+        if (sd is not None)or(ed is not None):
+            filter_date = ast.literal_eval(MongoHandlerConditionMolts.get("filterTimeBetween").format(sd, ed))
             _filter.update(filter_date)
         if symbol is not None:
             filter_symbol = ast.literal_eval(MongoHandlerConditionMolts.get("filterSymbol").format(symbol))
