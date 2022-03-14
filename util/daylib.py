@@ -16,6 +16,7 @@ class daylib():
     
     @classmethod
     def valid_intD(cls, int_date, allow_future=True):
+        assert type(int_date) == int, f'int_date must be int. Not:{type(int_date)}'
         if (int_date < 20000101)or(int_date>21001231):
             raise Exception("int_date must be 8-digits and following realworld")
         
