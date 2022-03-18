@@ -13,7 +13,7 @@ services:
       - ${HOST_BASE_DIR}/geco_commons/mq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
     networks:
       shared-nw:
-        ipv4_address: 172.30.0.4
+        ipv4_address: 172.30.0.129
     restart: always
 
 volumes:
