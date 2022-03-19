@@ -13,7 +13,8 @@ class ConfigManager:
             "private_api":"private_api.ini",
             "mongo":"mongo_config.ini",
             "log":"log_config.ini",
-            "hparams":"hparams.yaml"
+            "hparams":"hparams.yaml",
+            "postgres":"postgres_config.ini"
         }
         
     def load_ini_config(self, path=None,config_name=None,mode=None):

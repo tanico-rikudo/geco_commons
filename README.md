@@ -8,7 +8,11 @@ Cryptocurrency common libs and fundamental modules
   -  Refer to requirement.txt and Dockerfile in detail.
 
 ## Dependency
-
+- Postgress
+  - Need to install  libpq-dev and python3.x-dev
+  ```
+  RUN apt-get install -y libpq-dev 
+  ```
 
 ## Introduction
 1. Put INI files in place.
@@ -21,6 +25,7 @@ ini
 ├── model_config.ini
 ├── mongo_config.ini
 └── private_api.ini
+├── postgres_config.ini
 2. Update ini
 3. Copy almost same env info to shell config using in shells in remote and jupyter
 shell
