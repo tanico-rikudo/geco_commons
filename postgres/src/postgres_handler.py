@@ -1,11 +1,38 @@
 import psycopg2
-from psycopg2.extras import DictCursor
+from psycopg2.extras import DictCursor, execute_values
+
+PostgresHandlerQueryMolts = {
+    "insertOhlcv": "INSERT INTO ohlcv ({0}) VALUES %s;"
+}
+
 
 class PostgresUtil:
 
     def __init__(self, PostgresHandler, logger):
         self.dao = PostgresHandler
         self._logger = logger
+        
+
+    def insert_ohlcv(self, ohlcv_dict):
+        datas = ohlcv_dict.to_dict(orient='record')
+        values=[tuple(p.values()) for p in datas]
+        keys=list(datas[0].keys())
+        
+        # Key check
+        essential_key_list = set({"datetime", "open", "high", "low", "close", "volume", "symbol"})
+        assert essential_key_list == set(keys), f'Must be match ohlcv  table leys. You={keys}, Table={essential_key_list}'
+        
+        # Make key list
+        key_names = ""
+        length = len(keys)
+        for i, _name in enumerate(keys):
+            key_names+=_name
+            if i < length-1:
+                key_names+=","
+            
+        query = PostgresHandlerQueryMolts.get("insertOhlcv").format(key_names)
+        
+        self.dao.insert(query,values)
 
 
 class PostgresHandler:
@@ -71,9 +98,7 @@ class PostgresHandler:
 
     def insert(self, query, params):
         conn = self.get_conn()
-        cur = self.get_cursor(conn, cursor_mode=self.cursor_mode)
-        row = cur.fetchone()
-        result = []
-        cur.execute(sql)
+        # cur = self.get_cursor(conn, cursor_mode=self.cursor_mode)
+        cur = self.get_cursor(conn, cursor_mode=False)
         ret = execute_values(cur, query, params)
         conn.commit()
