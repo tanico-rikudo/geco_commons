@@ -140,6 +140,10 @@ dmypy.json
 mongodb/secret/*
 mongodb/init/*
 
+# postgress secret
+postgres/secret/*
+postgres/init/*
+
 
 #mlflow
 mlflow/mlruns/*
