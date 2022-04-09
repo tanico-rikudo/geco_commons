@@ -2,6 +2,7 @@ import pika
 import uuid
 import time
 
+
 def load_mq_settings(general_config):
     use_mq = general_config.get("USE_MQ")
     if use_mq:
@@ -18,8 +19,36 @@ def load_mq_settings(general_config):
         mqserver_host = None
         mqname = {}
         routing_key = {}
-    
-    return {"mqserver_host":mqserver_host, "mqname":mqname, "routing_key":routing_key}
+
+    return {"mqserver_host": mqserver_host, "mqname": mqname, "routing_key": routing_key}
+
+
+def init_mqclient(mqserver_host, mqname, routing_key, logger=None):
+    rpc_client = RpcClient(mqserver_host, mqname, routing_key, logger)
+
+    if logger is not None:
+        logger.info(f"[DONE] Set MQ client. Name={mqname}")
+
+    return rpc_client
+
+
+def close_mqclient(rpc_client, mqname, logger=None):
+    rpc_client.close_mq()
+
+    if logger is not None:
+        logger.info(f"[DONE] Close MQ client. Name={mqname}")
+
+
+def init_mqprovider( mqserver_host, mqname, routing_key, logger = None):
+    prpvider = MqProvider(
+        mqserver_host, mqname, routing_key, logger
+    )
+
+
+    if logger is not None:
+        logger.info(f"[DONE] Set MQ client. Name={mqname}")
+
+    return prpvider
 
 
 class MqProvider(object):
@@ -58,6 +87,7 @@ class MqProvider(object):
         except Exception as e:
             self.logger.warning("Fail to close mq safety")
 
+
 class RpcClient(object):
 
     def __init__(self, mqserver_host, mqname, routing_key, logger):
@@ -79,7 +109,7 @@ class RpcClient(object):
             auto_ack=True)
 
         self.logger.info(f"[DONE] RPC request client initilized. Host={mqserver_host}, Routing={routing_key}")
-        
+
     def connect_mq(self):
         self.logger.info(
             f"[START] RPC: Connect MQ server... Host={self.mqserver_host}")
@@ -87,16 +117,16 @@ class RpcClient(object):
             pika.ConnectionParameters(host=self.mqserver_host))
         self.channel = self.connection.channel()
         self.logger.info(
-           f"[DONE] RPC: Connect MQ server... Host={self.mqserver_host}")
-        
+            f"[DONE] RPC: Connect MQ server... Host={self.mqserver_host}")
+
     def close_mq(self):
         try:
             self.connection.close()
             self.logger.info(
-            f"[DONE] RPC: disconnect MQ server... Host={self.mqserver_host}")
+                f"[DONE] RPC: disconnect MQ server... Host={self.mqserver_host}")
         except:
             self.logger.warning(f"Already Closed.  RPC: disconnect MQ server... Host={self.mqserver_host}")
-    
+
     def on_response(self, ch, method, props, body):
         if self.corr_id == props.correlation_id:
             time.sleep(1)
@@ -115,7 +145,7 @@ class RpcClient(object):
                 correlation_id=self.corr_id,
             ),
             body=str(commannd_msg))
-        #Note:  anxious....
+        # Note:  anxious....
         while self.response is None:
             self.connection.process_data_events(time_limit=5)
             time.sleep(1)
