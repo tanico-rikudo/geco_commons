@@ -2,8 +2,11 @@ import psycopg2
 from psycopg2.extras import DictCursor, execute_values
 
 PostgresHandlerQueryMolts = {
-    "insertOhlcv": "INSERT INTO ohlcv ({0}) VALUES %s;"
+    "insertOhlcv": "INSERT INTO ohlcv ({0}) VALUES %s;",
+    "insertRealPred": "INSERT INTO prediction ({0}) VALUES %s;",
+    "fetchRealPred": "SELECT * FROM prediction where DATE={0} TIME={1}, SYM={2};"
 }
+
 
 
 class PostgresUtil:
@@ -11,28 +14,54 @@ class PostgresUtil:
     def __init__(self, PostgresHandler, logger):
         self.dao = PostgresHandler
         self._logger = logger
-        
 
     def insert_ohlcv(self, ohlcv_dict):
         datas = ohlcv_dict.to_dict(orient='record')
-        values=[tuple(p.values()) for p in datas]
-        keys=list(datas[0].keys())
-        
+        values = [tuple(p.values()) for p in datas]
+        keys = list(datas[0].keys())
+
         # Key check
-        essential_key_list = set({"datetime", "open", "high", "low", "close", "volume", "symbol"})
-        assert essential_key_list == set(keys), f'Must be match ohlcv  table leys. You={keys}, Table={essential_key_list}'
-        
+        essential_key_list = {"datetime", "open", "high", "low", "close", "volume", "symbol"}
+        assert essential_key_list == \
+               set(keys), f'Must be match ohlcv  table leys. You={keys}, Table={essential_key_list}'
+
         # Make key list
         key_names = ""
         length = len(keys)
         for i, _name in enumerate(keys):
-            key_names+=_name
-            if i < length-1:
-                key_names+=","
-            
+            key_names += _name
+            if i < length - 1:
+                key_names += ","
+
         query = PostgresHandlerQueryMolts.get("insertOhlcv").format(key_names)
-        
-        self.dao.insert(query,values)
+
+        self.dao.insert(query, values)
+
+    def insert_realtime_prediction(self, pred_dict):
+        datas = pred_dict.to_dict(orient='record')
+        values = [tuple(p.values()) for p in datas]
+        keys = list(datas[0].keys())
+
+        # Key check
+        essential_key_list = {"datetime", "sym", "pred"}
+        assert essential_key_list == set(
+            keys), f'Must be match pred table keys. You={keys}, Table={essential_key_list}'
+
+        # Make key list
+        key_names = ""
+        length = len(keys)
+        for i, _name in enumerate(keys):
+            key_names += _name
+            if i < length - 1:
+                key_names += ","
+
+        query = PostgresHandlerQueryMolts.get("insertRealPred").format(key_names)
+
+        self.dao.insert(query, values)
+
+    def get_realtime_prediction(self,date,time,sym):
+        query = PostgresHandlerQueryMolts.get("fetchRealPred").format(date, time, sym)
+        return self.dao.fetch(query)
 
 
 class PostgresHandler:
@@ -93,7 +122,7 @@ class PostgresHandler:
             if row is None:
                 break
             result.append(dict(row))
-            
+
         return result
 
     def insert(self, query, params):
