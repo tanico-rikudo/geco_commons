@@ -10,10 +10,12 @@ def load_mq_settings(general_config):
         mqname = {
             "realtime": general_config.get("REALTIMEFEED_MQ_NAME"),
             "historical": general_config.get("HISTORICAL_MQ_NAME"),
+            "realpred": general_config.get("REALPRED_MQ_NAME")
         }
         routing_key = {
             "realtime": general_config.get("REALTIMEFEED_MQ_ROUTING"),
             "historical": general_config.get("HISTORICAL_MQ_ROUTING"),
+            "realpred": general_config.get("REALPRED_MQ_ROUTING")
         }
     else:
         mqserver_host = None
@@ -39,16 +41,15 @@ def close_mqclient(rpc_client, mqname, logger=None):
         logger.info(f"[DONE] Close MQ client. Name={mqname}")
 
 
-def init_mqprovider( mqserver_host, mqname, routing_key, logger = None):
-    prpvider = MqProvider(
+def init_mqprovider(mqserver_host, mqname, routing_key, logger=None):
+    provider = MqProvider(
         mqserver_host, mqname, routing_key, logger
     )
-
 
     if logger is not None:
         logger.info(f"[DONE] Set MQ client. Name={mqname}")
 
-    return prpvider
+    return provider
 
 
 class MqProvider(object):
@@ -56,6 +57,7 @@ class MqProvider(object):
         self.mqserver_host = mqserver_host
         self.mqname = mqname
         self.routing_key = routing_key
+        self.channel = None
         self.logger = logger
 
     def connect_mq(self):
@@ -82,6 +84,7 @@ class MqProvider(object):
         try:
             self.channel.basic_cancel()  # declare no more send
             self.connection.close()
+            self.channel = None
             self.logger.info(
                 f"[DONE] Close MQ connecton. Host={self.mqserver_host}, Name={self.mqname}, Routing={self.routing_key}")
         except Exception as e:
@@ -95,9 +98,11 @@ class RpcClient(object):
         self.mqname = mqname
         self.routing_key = routing_key
         self.logger = logger
-
+        # self.channel = None
         self.connect_mq()
+        self.connection = None
 
+        # TODO: initialize???
         # result = self.channel.queue_declare(queue=self.mqname, exclusive=True)
         result = self.channel.queue_declare(queue=self.mqname, exclusive=False)
 
@@ -119,9 +124,21 @@ class RpcClient(object):
         self.logger.info(
             f"[DONE] RPC: Connect MQ server... Host={self.mqserver_host}")
 
+    def is_connect(self):
+        try:
+            if self.connection is None:
+                return False
+            return self.connection.is_open()
+        except Exception as e :
+            self.logger.warning(
+                f"Connection Check Failure... Host={self.mqserver_host}:{e}")
+            return False
+
+
     def close_mq(self):
         try:
             self.connection.close()
+            self.channel = None
             self.logger.info(
                 f"[DONE] RPC: disconnect MQ server... Host={self.mqserver_host}")
         except:
