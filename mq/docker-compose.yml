@@ -1,21 +1,24 @@
 version: '3'
- 
+
 services:
-  my-queue:
+  misaka_mq:
     container_name: misaka_rabbitmq
     image: rabbitmq:3.8.9-management
     ports:
       - '5672:5672'
       - '15672:15672'
     volumes:
-      - ./rabbitmq-data:/var/lib/rabbitmq
+      - ${HOST_DATA_BASE_DIR}/rabbitmq:/var/lib/rabbitmq
+      - ${HOST_BASE_DIR}/geco_commons/mq/definitions.json:/opt/definitions.json:ro
+      - ${HOST_BASE_DIR}/geco_commons/mq/rabbitmq.config:/etc/rabbitmq/rabbitmq.config:ro
     networks:
       shared-nw:
-        ipv4_address: 172.30.0.4
+        ipv4_address: 172.30.0.129
+    restart: always
 
 volumes:
   rabbitmq-data:
 
 networks:
-    shared-nw:
-      external: true
+  shared-nw:
+    external: true
